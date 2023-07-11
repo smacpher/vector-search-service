@@ -10,11 +10,8 @@ Building from source requires you to do three things:
 
 ## Setting up LLVM Clang
 
-Apple Clang doesn't come with OpenMP, which FAISS requires, out of the box, so
-I've opted to use LLVM Clang.
-
 Builds have been verified to work with the LLVM Clang version 16+ on x86
-Darwin. Other setups may work, too, but I haven't tested them.
+Darwin. Other setups may also work, but I haven't tested them.
 
 1. Install LLVM Clang using Homebrew:
 
