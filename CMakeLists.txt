@@ -65,20 +65,6 @@ add_custom_command(
         "${index_service_proto}"
       DEPENDS "${index_service_proto}")
 
-set(_PROTOS_PY_OUT_DIR "${CMAKE_CURRENT_SOURCE_DIR}")
-set(index_service_proto_py_srcs "${_PROTOS_DIR}/index_service_pb2.py")
-set(index_service_grpc_py_srcs "${_PROTOS_DIR}/index_service_pb2_grpc.py")
-add_custom_command(
-      OUTPUT
-        "${index_service_proto_py_srcs}" "${index_service_grpc_py_srcs}"
-      COMMAND ${_PROTOBUF_PROTOC}
-      ARGS
-        --python_out "${_PROTOS_PY_OUT_DIR}"
-        --grpc_python_out "${_PROTOS_PY_OUT_DIR}"
-        --plugin=protoc-gen-grpc_python="${_GRPC_PY_PLUGIN_EXECUTABLE}"
-        "${index_service_proto}"
-      DEPENDS "${index_service_proto}")
-
 # include generated proto sources
 # TODO: replace this with `target_include_directories`
 include_directories("${CMAKE_CURRENT_BINARY_DIR}")
