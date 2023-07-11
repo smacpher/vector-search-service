@@ -20,31 +20,31 @@ namespace index_service::faiss {
 // `private` members are inaccessible to the derived class.
 class FaissIndexServiceImpl final
     : public index_service::IndexService::Service {
- public:
+public:
   // Note: The `explicit` function specific disallows implicit type conversions.
   // For example, `FaissIndexServiceImple service = 1;` is disallowed.
   explicit FaissIndexServiceImpl(int dimensions,
-                                 const char* factory_string = "IDMap,Flat",
+                                 const char *factory_string = "IDMap,Flat",
                                  ::faiss::MetricType metric_type =
                                      ::faiss::MetricType::METRIC_INNER_PRODUCT);
 
-  grpc::Status Describe(grpc::ServerContext* context,
-                        const index_service::DescribeRequest* describe_request,
-                        index_service::DescribeResponse* describe_response);
+  grpc::Status Describe(grpc::ServerContext *context,
+                        const index_service::DescribeRequest *describe_request,
+                        index_service::DescribeResponse *describe_response);
 
-  grpc::Status Insert(grpc::ServerContext* context,
-                      const index_service::InsertRequest* insert_request,
-                      index_service::InsertResponse* insert_response);
+  grpc::Status Insert(grpc::ServerContext *context,
+                      const index_service::InsertRequest *insert_request,
+                      index_service::InsertResponse *insert_response);
 
-  grpc::Status Upsert(grpc::ServerContext* context,
-                      const index_service::UpsertRequest* upsert_request,
-                      index_service::UpsertResponse* upsert_response);
+  grpc::Status Upsert(grpc::ServerContext *context,
+                      const index_service::UpsertRequest *upsert_request,
+                      index_service::UpsertResponse *upsert_response);
 
-  grpc::Status Search(grpc::ServerContext* context,
-                      const index_service::SearchRequest* search_request,
-                      index_service::SearchResponse* search_response);
+  grpc::Status Search(grpc::ServerContext *context,
+                      const index_service::SearchRequest *search_request,
+                      index_service::SearchResponse *search_response);
 
- private:
+private:
   // Note: The google style guide calls for class data members variables
   // to be suffixed with trailing underscores. The `m_` prefix comes
   // from https://en.wikipedia.org/wiki/Hungarian_notation.
@@ -53,7 +53,7 @@ class FaissIndexServiceImpl final
   int m_dimensions_;
 
   // The `faiss` factory string used to construct this index.
-  const char* m_factory_string_;
+  const char *m_factory_string_;
 
   // The `faiss` similarity metric type that this index supports.
   ::faiss::MetricType m_metric_type_;
@@ -65,4 +65,4 @@ class FaissIndexServiceImpl final
   std::unordered_set<int> m_ids_seen_;
 };
 
-}  // namespace index_service::faiss
+} // namespace index_service::faiss

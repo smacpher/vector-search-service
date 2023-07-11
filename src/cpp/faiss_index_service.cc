@@ -38,18 +38,17 @@ using index_service::Vector;
 using index_service::faiss::FaissIndexServiceImpl;
 
 FaissIndexServiceImpl::FaissIndexServiceImpl(int dimensions,
-                                             const char* factory_string,
+                                             const char *factory_string,
                                              MetricType metric_type)
-    : m_dimensions_(dimensions),
-      m_factory_string_(factory_string),
+    : m_dimensions_(dimensions), m_factory_string_(factory_string),
       m_metric_type_(metric_type),
       m_index_(::faiss::index_factory(m_dimensions_, m_factory_string_,
                                       m_metric_type_)),
       m_ids_seen_{} {};
 
-Status FaissIndexServiceImpl::Describe(ServerContext* context,
-                                       const DescribeRequest* describe_request,
-                                       DescribeResponse* describe_response) {
+Status FaissIndexServiceImpl::Describe(ServerContext *context,
+                                       const DescribeRequest *describe_request,
+                                       DescribeResponse *describe_response) {
   LOG(INFO) << absl::StrFormat("Received describe request.");
 
   describe_response->set_dimensions(m_dimensions_);
@@ -57,9 +56,9 @@ Status FaissIndexServiceImpl::Describe(ServerContext* context,
   return Status::OK;
 }
 
-Status FaissIndexServiceImpl::Insert(ServerContext* context,
-                                     const InsertRequest* insert_request,
-                                     InsertResponse* insert_response) {
+Status FaissIndexServiceImpl::Insert(ServerContext *context,
+                                     const InsertRequest *insert_request,
+                                     InsertResponse *insert_response) {
   int num_vectors = insert_request->vectors_size();
 
   LOG(INFO) << absl::StrFormat("Received insert request. num_vectors=%d",
@@ -87,7 +86,8 @@ Status FaissIndexServiceImpl::Insert(ServerContext* context,
       // TODO: Support upsert for indexes that support removal.
       ids.push_back(id);
 
-      for (int j = 0; j < m_dimensions_; j++) vectors.push_back(raw[j]);
+      for (int j = 0; j < m_dimensions_; j++)
+        vectors.push_back(raw[j]);
 
       m_ids_seen_.insert(id);
     }
@@ -98,9 +98,9 @@ Status FaissIndexServiceImpl::Insert(ServerContext* context,
   return Status::OK;
 }
 
-Status FaissIndexServiceImpl::Upsert(ServerContext* context,
-                                     const UpsertRequest* upsert_request,
-                                     UpsertResponse* upsert_response) {
+Status FaissIndexServiceImpl::Upsert(ServerContext *context,
+                                     const UpsertRequest *upsert_request,
+                                     UpsertResponse *upsert_response) {
   int num_vectors = upsert_request->vectors_size();
 
   LOG(INFO) << absl::StrFormat("Received upsert request. num_vectors=%d",
@@ -127,10 +127,12 @@ Status FaissIndexServiceImpl::Upsert(ServerContext* context,
                         raw.size(), m_dimensions_));
     }
 
-    if (m_ids_seen_.find(id) != m_ids_seen_.end()) ids_to_update.push_back(id);
+    if (m_ids_seen_.find(id) != m_ids_seen_.end())
+      ids_to_update.push_back(id);
 
     ids.push_back(id);
-    for (int j = 0; j < m_dimensions_; j++) vectors.push_back(raw[j]);
+    for (int j = 0; j < m_dimensions_; j++)
+      vectors.push_back(raw[j]);
   }
 
   m_ids_seen_.insert(ids.begin(), ids.end());
@@ -149,16 +151,16 @@ Status FaissIndexServiceImpl::Upsert(ServerContext* context,
   return Status::OK;
 }
 
-Status FaissIndexServiceImpl::Search(ServerContext* context,
-                                     const SearchRequest* search_request,
-                                     SearchResponse* search_response) {
+Status FaissIndexServiceImpl::Search(ServerContext *context,
+                                     const SearchRequest *search_request,
+                                     SearchResponse *search_response) {
   LOG(INFO) << absl::StrFormat("Received search request. k=%d",
                                search_request->k());
 
   // Allocate arrays for neighbor IDs and scores to populate by search.
   int k = search_request->k();
-  auto* neighbor_ids = new idx_t[k];
-  auto* neighbor_scores = new float[k];
+  auto *neighbor_ids = new idx_t[k];
+  auto *neighbor_scores = new float[k];
 
   // Prepare query vector.
   RepeatedField<float> query_vector = search_request->query_vector();

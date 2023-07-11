@@ -40,8 +40,7 @@ ShardedIndexServiceImpl::ShardedIndexServiceImpl(
     int dimensions,
     std::vector<std::shared_ptr<Channel>> shard_service_channels,
     int shard_capacity)
-    : m_dimensions_(dimensions),
-      m_shard_capacity_(shard_capacity),
+    : m_dimensions_(dimensions), m_shard_capacity_(shard_capacity),
       m_shard_sizes_(shard_service_channels.size()) {
   // Initial service stubs for each shard.
   // The order in which channels are given is the order in which shards will
@@ -55,9 +54,9 @@ ShardedIndexServiceImpl::ShardedIndexServiceImpl(
 };
 
 Status ShardedIndexServiceImpl::Describe(
-    ServerContext* context,
-    const index_service::DescribeRequest* describe_request,
-    index_service::DescribeResponse* describe_response) {
+    ServerContext *context,
+    const index_service::DescribeRequest *describe_request,
+    index_service::DescribeResponse *describe_response) {
   LOG(INFO) << absl::StrFormat("Received describe request.");
 
   int total_num_vectors = 0;
@@ -67,7 +66,7 @@ Status ShardedIndexServiceImpl::Describe(
     DescribeRequest describe_request;
     DescribeResponse describe_response;
 
-    auto& stub = m_shard_service_stubs_[shard_idx];
+    auto &stub = m_shard_service_stubs_[shard_idx];
 
     LOG(INFO) << absl::StrFormat("Describing shard %d...", shard_idx);
     Status status =
@@ -77,7 +76,8 @@ Status ShardedIndexServiceImpl::Describe(
       return Status(StatusCode::UNAVAILABLE,
                     absl::StrFormat("Shard %d is unhealthy.", shard_idx));
 
-    if (status.ok()) total_num_vectors += describe_response.num_vectors();
+    if (status.ok())
+      total_num_vectors += describe_response.num_vectors();
     LOG(INFO) << absl::StrFormat(
         "Successfully described shard %d. dimensions=%d. num_vectors=%d",
         shard_idx, describe_response.dimensions(),
@@ -91,9 +91,9 @@ Status ShardedIndexServiceImpl::Describe(
 }
 
 Status ShardedIndexServiceImpl::Insert(
-    grpc::ServerContext* context,
-    const index_service::InsertRequest* insert_request,
-    index_service::InsertResponse* insert_response) {
+    grpc::ServerContext *context,
+    const index_service::InsertRequest *insert_request,
+    index_service::InsertResponse *insert_response) {
   // Acquire the insertion lock.
   // Note: `lock_guard` will automatically release lock when this guard
   // instance goes out of scope (i.e. the function completes).
@@ -127,7 +127,7 @@ Status ShardedIndexServiceImpl::Insert(
     int num_to_fill = shard_fill.second;
 
     // Get the stub of the shard to insert batch to.
-    auto& shard_stub = m_shard_service_stubs_.at(shard_idx);
+    auto &shard_stub = m_shard_service_stubs_.at(shard_idx);
 
     // Initialize shard insert request objects.
     ClientContext shard_client_context;
@@ -170,7 +170,7 @@ Status ShardedIndexServiceImpl::Insert(
     if (num_inserted) {
       m_shard_sizes_[shard_idx] += num_inserted;
 
-      for (const Vector& vector : shard_insert_request.vectors())
+      for (const Vector &vector : shard_insert_request.vectors())
         m_vector_shard_assignments_.insert({vector.id(), shard_idx});
 
       LOG(INFO) << absl::StrFormat(
@@ -186,9 +186,9 @@ Status ShardedIndexServiceImpl::Insert(
 }
 
 Status ShardedIndexServiceImpl::Upsert(
-    grpc::ServerContext* context,
-    const index_service::UpsertRequest* upsert_request,
-    index_service::UpsertResponse* upsert_response) {
+    grpc::ServerContext *context,
+    const index_service::UpsertRequest *upsert_request,
+    index_service::UpsertResponse *upsert_response) {
   int num_vectors = upsert_request->vectors_size();
   LOG(INFO) << absl::StrFormat("Received upsert request. num_vectors=%d",
                                num_vectors);
@@ -199,7 +199,7 @@ Status ShardedIndexServiceImpl::Upsert(
   std::unordered_map<int, int> shards_num_inserted;
 
   std::vector<Vector> new_vectors;
-  for (const Vector& vector : upsert_request->vectors()) {
+  for (const Vector &vector : upsert_request->vectors()) {
     auto it = m_vector_shard_assignments_.find(vector.id());
     if (it != m_vector_shard_assignments_.end()) {
       // Vector already exists in a shard.
@@ -243,7 +243,7 @@ Status ShardedIndexServiceImpl::Upsert(
 
     // Note: Retrieve the shard upsert request by reference so we mutate the
     // value in the map.
-    UpsertRequest& shard_upsert_request = shard_upsert_requests[shard_idx];
+    UpsertRequest &shard_upsert_request = shard_upsert_requests[shard_idx];
 
     // Copy allocated portion of new vectors into shard insert request.
     for (; vector_idx < offset + num_to_fill; vector_idx++)
@@ -265,14 +265,14 @@ Status ShardedIndexServiceImpl::Upsert(
     UpsertResponse shard_upsert_response;
 
     // Get the stub of the shard to insert batch to.
-    auto& shard_stub = m_shard_service_stubs_.at(shard_idx);
+    auto &shard_stub = m_shard_service_stubs_.at(shard_idx);
 
     Status shard_status = shard_stub->Upsert(
         &shard_client_context, shard_upsert_request, &shard_upsert_response);
 
     // Record that each vector was successfully upserted to the current shard.
     // For vectors that already exist, effectively this is a no-op.
-    for (const Vector& vector : shard_upsert_request.vectors())
+    for (const Vector &vector : shard_upsert_request.vectors())
       m_vector_shard_assignments_.insert({vector.id(), shard_idx});
 
     if (!shard_status.ok()) {
@@ -299,9 +299,9 @@ Status ShardedIndexServiceImpl::Upsert(
 }
 
 Status ShardedIndexServiceImpl::Search(
-    grpc::ServerContext* context,
-    const index_service::SearchRequest* search_request,
-    index_service::SearchResponse* search_response) {
+    grpc::ServerContext *context,
+    const index_service::SearchRequest *search_request,
+    index_service::SearchResponse *search_response) {
   LOG(INFO) << absl::StrFormat("Received search request. k=%d",
                                search_request->k());
 
@@ -313,7 +313,7 @@ Status ShardedIndexServiceImpl::Search(
 
     // Empty index.
     for (int i = 0; i < search_request->k(); i++) {
-      Neighbor* neighbor = search_response->add_neighbors();
+      Neighbor *neighbor = search_response->add_neighbors();
       neighbor->set_id(-1);
       neighbor->set_score(-std::numeric_limits<float>::max());
     }
@@ -336,7 +336,7 @@ Status ShardedIndexServiceImpl::Search(
 
   first_shard_search_request.CopyFrom(*search_request);
 
-  auto& first_shard_stub = m_shard_service_stubs_.at(0);
+  auto &first_shard_stub = m_shard_service_stubs_.at(0);
 
   LOG(INFO) << absl::StrFormat("Searching shard 0. shard_size=%d",
                                m_shard_sizes_[0]);
@@ -357,8 +357,8 @@ Status ShardedIndexServiceImpl::Search(
 
   // Define a comparator function used to build the k-sized min-heap of best
   // neighbors seen.
-  auto is_score_greater = [](const Neighbor& first_neighbor,
-                             const Neighbor& second_neighbor) {
+  auto is_score_greater = [](const Neighbor &first_neighbor,
+                             const Neighbor &second_neighbor) {
     return first_neighbor.score() > second_neighbor.score();
   };
 
@@ -377,7 +377,7 @@ Status ShardedIndexServiceImpl::Search(
 
     shard_search_request.CopyFrom(*search_request);
 
-    auto& shard_stub = m_shard_service_stubs_.at(shard_idx);
+    auto &shard_stub = m_shard_service_stubs_.at(shard_idx);
 
     Status shard_status = shard_stub->Search(
         &shard_client_context, shard_search_request, &shard_search_response);
@@ -393,8 +393,8 @@ Status ShardedIndexServiceImpl::Search(
 
     LOG(INFO) << absl::StrFormat("Successfully searched shard %d.", shard_idx);
 
-    for (const Neighbor& neighbor : shard_search_response.neighbors()) {
-      const Neighbor& current_worst_candidate = best_candidates[0];
+    for (const Neighbor &neighbor : shard_search_response.neighbors()) {
+      const Neighbor &current_worst_candidate = best_candidates[0];
 
       if (is_score_greater(neighbor, current_worst_candidate)) {
         // Replace the smallest (i.e. worst) candidate so far if this one is

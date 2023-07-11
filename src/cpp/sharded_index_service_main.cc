@@ -18,7 +18,7 @@ using grpc::Server;
 using grpc::ServerBuilder;
 using index_service::sharded::ShardedIndexServiceImpl;
 
-int main(int argc, char* argv[]) {
+int main(int argc, char *argv[]) {
   const int num_required_args = 3;
   if (argc < num_required_args) {
     std::cout << "Expected at least 3 arguments: <port> <dimensions> "

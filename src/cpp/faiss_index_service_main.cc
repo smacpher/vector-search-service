@@ -16,7 +16,7 @@ using grpc::Server;
 using grpc::ServerBuilder;
 using index_service::faiss::FaissIndexServiceImpl;
 
-int main(int argc, char* argv[]) {
+int main(int argc, char *argv[]) {
   if (argc != 3) {
     std::cout << "Expected 2 arguments." << std::endl;
     return 1;

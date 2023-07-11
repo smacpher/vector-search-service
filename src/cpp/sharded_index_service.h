@@ -12,36 +12,37 @@ namespace index_service::sharded {
 
 class ShardedIndexServiceImpl final
     : public index_service::IndexService::Service {
- public:
+public:
   explicit ShardedIndexServiceImpl(
       int dimensions,
       std::vector<std::shared_ptr<grpc::Channel>> shard_service_channels,
       int shard_capacity = 1);
 
   // TODO: Consider consolidating this with `FaissIndexServiceImpl`.
-  grpc::Status Describe(grpc::ServerContext* context,
-                        const index_service::DescribeRequest* describe_request,
-                        index_service::DescribeResponse* describe_response);
+  grpc::Status Describe(grpc::ServerContext *context,
+                        const index_service::DescribeRequest *describe_request,
+                        index_service::DescribeResponse *describe_response);
 
-  grpc::Status Insert(grpc::ServerContext* context,
-                      const index_service::InsertRequest* insert_request,
-                      index_service::InsertResponse* insert_response);
+  grpc::Status Insert(grpc::ServerContext *context,
+                      const index_service::InsertRequest *insert_request,
+                      index_service::InsertResponse *insert_response);
 
-  grpc::Status Upsert(grpc::ServerContext* context,
-                      const index_service::UpsertRequest* upsert_request,
-                      index_service::UpsertResponse* upsert_response);
+  grpc::Status Upsert(grpc::ServerContext *context,
+                      const index_service::UpsertRequest *upsert_request,
+                      index_service::UpsertResponse *upsert_response);
 
-  grpc::Status Search(grpc::ServerContext* context,
-                      const index_service::SearchRequest* search_request,
-                      index_service::SearchResponse* search_response);
+  grpc::Status Search(grpc::ServerContext *context,
+                      const index_service::SearchRequest *search_request,
+                      index_service::SearchResponse *search_response);
 
- private:
+private:
   // Returns the shards to use in searches, i.e. shards that have a
   // non-zero number of vectors in them.
   inline std::vector<int> get_search_shard_idx() {
     std::vector<int> non_zero_idx;
     for (int i = 0; i < m_shard_sizes_.size(); i++) {
-      if (m_shard_sizes_[i] != 0) non_zero_idx.push_back(i);
+      if (m_shard_sizes_[i] != 0)
+        non_zero_idx.push_back(i);
     }
 
     return non_zero_idx;
@@ -78,4 +79,4 @@ class ShardedIndexServiceImpl final
   std::unordered_map<int, int> m_vector_shard_assignments_;
 };
 
-}  // namespace index_service::sharded
+} // namespace index_service::sharded

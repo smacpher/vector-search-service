@@ -12,20 +12,20 @@ namespace {
 
 // Note: An unnamed ("anonymous") namespace makes this function only
 // available for use in this file.
-template <typename T>
-void swap(T* a, int i, int j) {
+template <typename T> void swap(T *a, int i, int j) {
   T temp = a[i];
   a[i] = a[j];
   a[j] = temp;
 }
 
-}  // namespace
+} // namespace
 
 namespace algo {
 
 template <typename T, typename Compare>
-T heap_replace(T* a, int size, T v, Compare compare) {
-  if (!size) return v;
+T heap_replace(T *a, int size, T v, Compare compare) {
+  if (!size)
+    return v;
 
   // Replace root item with new item.
   T popped = a[0];
@@ -61,14 +61,13 @@ T heap_replace(T* a, int size, T v, Compare compare) {
   return popped;
 }
 
-template <typename T>
-T heap_replace(T* a, int size, T v) {
+template <typename T> T heap_replace(T *a, int size, T v) {
   return heap_replace(a, size, v, std::greater<T>());
 }
 
-std::pair<int, std::map<int, int>> greedy_fill(
-    int num_elements, int bucket_capacity,
-    const std::vector<int>& bucket_sizes) {
+std::pair<int, std::map<int, int>>
+greedy_fill(int num_elements, int bucket_capacity,
+            const std::vector<int> &bucket_sizes) {
   if (!num_elements) {
     return std::make_pair(0, std::map<int, int>{});
   }
@@ -99,4 +98,4 @@ std::pair<int, std::map<int, int>> greedy_fill(
   return std::make_pair(num_elements_leftover, bucket_fills);
 }
 
-}  // namespace algo
+} // namespace algo
