@@ -1,0 +1,75 @@
+syntax  = "proto3";
+
+package index_service;
+
+// A service that serves a single index.
+service IndexService {
+    // Describes statistics about the index.
+    rpc Describe(DescribeRequest) returns (DescribeResponse) {}
+    
+    // Inserts a batch of vectors into the index, ignoring vectors that already
+    // exist in the index.
+    rpc Insert(InsertRequest) returns (InsertResponse) {}
+
+    // Upserts a batch of vectors into the index. Inserts new vectors or
+    // updates existing vectors.
+    rpc Upsert(UpsertRequest) returns (UpsertResponse) {}
+
+    // Searches the index for the k-nearest neighbors to the given query.
+    rpc Search(SearchRequest) returns (SearchResponse) {}
+}
+
+message DescribeRequest {}
+
+message DescribeResponse {
+    // The dimensions of the index. For example, if this is set to `256`, the
+    // index serves vectors with 256 dimensions.
+    uint32 dimensions = 1;
+
+    // The number of vectors currently in the index.
+    uint32 num_vectors = 2;
+}
+
+message InsertRequest {
+    // The vectors to insert.
+    repeated Vector vectors = 1; 
+}
+
+message InsertResponse {}
+
+message UpsertRequest{
+    // The vectors to upsert.
+    repeated Vector vectors = 1;
+}
+
+message UpsertResponse {}
+
+message Vector {
+    // The identifier of this vector.
+    uint32 id = 1;
+
+    // The raw values in this vector.
+    repeated float raw = 2;
+}
+
+message SearchRequest {
+    // The number of nearest neighbors to retrieve.
+    uint32 k = 1;
+
+    // The query vector to find nearest neighbors for.
+    repeated float query_vector = 2;
+}
+
+message SearchResponse {
+    // The k-nearest neighbors to the given query.
+    repeated Neighbor neighbors = 1;
+}
+
+message Neighbor {
+    // The identifier of the vector.
+    int32 id = 1;
+    
+    // The score (i.e. distance) of the vector to the query vector.
+    float score = 2;
+}
+
