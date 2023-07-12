@@ -21,9 +21,11 @@ A single-node index service serve a single index directly from memory. Client
 requests to add vectors to an index, search an index, or describe an index are
 serviced by the in-memory index.
 
+```text
   ┌────────┐   ┌─────────────┐
   │ client ├──►│    index    │
   └────────┘   └─────────────┘
+```
 
 ### Multi-node
 
@@ -31,6 +33,7 @@ A multi-node index service serves an index that is sharded across one or more
 single-node index services. When a client makes a request, a multi-node index
 service calls out to one or more single-node indexes and reduces the results.
 
+```text
                                     ┌─────────────┐
                                 ┌──►│index shard 0│
                                 │   └─────────────┘
@@ -46,6 +49,7 @@ service calls out to one or more single-node indexes and reduces the results.
                                 │   ┌─────────────┐
                                 └──►│index shard N│
                                     └─────────────┘
+```
 
 Specifically, the sharded index service does the following for each RPC:
 
@@ -66,6 +70,7 @@ We greedily fill each index shard to capacity before moving on to the next. For
 example, inserting __12k vectors across 3 shards, each with a capacity of 5k__
 results in the following allocation:
 
+```text
  5k vectors  5k vectors   2k vectors  (# of vectors)
 
       x           x
@@ -78,6 +83,7 @@ results in the following allocation:
  └─────────┘ └─────────┘ └─────────┘
 
      100%        100%        40%      (% of capacity)
+```
 
 Why do we do this? It makes incrementally scaling up the capacity of an index
 easier and resource efficient. For example, if our index hits its
@@ -116,6 +122,7 @@ For existing vectors, we add them to the batch corresponding to the
 shard they are in. For new vectors, we greedily assign them to batches
 based on the current capacity of shards. Consider the following visual example:
 
+```text
                                                           ┌─────────┐
                                                           │ shard 0 │
                                                           └─────────┘
@@ -148,6 +155,7 @@ based on the current capacity of shards. Consider the following visual example:
                                                         ├──────────────┤
                                                         │              │
                                                         └──────────────┘
+```
 
 Vectors 1, 2, and 4 already exist in shard 0 so we upsert them in a single
 request to shard 0. Vectors 3 and 6 exist in shard 1, and vector 5 is new and
