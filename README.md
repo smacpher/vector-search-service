@@ -53,11 +53,12 @@ service calls out to one or more single-node indexes and reduces the results.
 
 Specifically, the sharded index service does the following for each RPC:
 
-* `Describe`: invokes the `Describe(...)` on each single-node index and sums
+* `Describe`: invokes `Describe` on each single-node index and sums
 the total number of vectors
-* `Upsert`: for new vectors, it greedily fills each shard to capacity; for
-existing vectors, it identifies which shard the vector is a part of and updates
-it in that shard
+* `Upsert`: invoke an `Upsert` as necessary to each shard; for new vectors, it
+greedily assigns them to the next shard(s) that have available capacity; for
+existing vectors, it identifies which shard the vector is a part of and
+updates it in that shard
 * `Search`: invokes `Search` for each shard, returning the top-k candidates per
 shard, and then takes the top-k from the union of all shard candidates
 
@@ -96,8 +97,7 @@ autoscaling behavior isn't implemented yet :P).
 Consider an alternative approach of inserting vectors to shards in
 round robin order. We could also incrementally add more shards when we hit
 capacity but until we fill up all shards, we will have multiple partially
-filled shards that we can't scale down. In reality, both approaches (greedy
-vs. round robin) are pretty similar.
+filled shards that we can't scale down.
 
 As an optimization, we don't make requests to shards that we know are empty
 for `Describe` and `Search` RPCs. As mentioned before, we go further and
