@@ -13,7 +13,7 @@ This project currently supports serving vector indexes on a single node or
 sharded across multiple nodes.
 
 Both the single-node and multi-node index share the same API interface, defined
-by [index_service.proto](../src/proto/index_service.proto).
+by [index_service.proto](src/proto/index_service.proto).
 
 ### Single-node
 
